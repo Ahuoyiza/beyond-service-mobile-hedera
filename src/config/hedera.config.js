@@ -1,30 +1,25 @@
-/**
- * Hedera Network Configuration
- * 
- * This module provides configuration settings for connecting to the Hedera network.
- * It supports both testnet and mainnet environments.
- */
 
-require('dotenv').config();
+require("dotenv").config();
 
 const {
   Client,
   AccountId,
-  PrivateKey
-} = require('@hashgraph/sdk');
+  PrivateKey,
+  Hbar
+} = require("@hashgraph/sdk");
 
 /**
  * Get Hedera client configured for the specified network
  * @returns {Client} Configured Hedera client
  */
 function getHederaClient() {
-  const network = process.env.HEDERA_NETWORK || 'testnet';
+  const network = process.env.HEDERA_NETWORK || "testnet";
   
   let client;
   
-  if (network === 'testnet') {
+  if (network === "testnet") {
     client = Client.forTestnet();
-  } else if (network === 'mainnet') {
+  } else if (network === "mainnet") {
     client = Client.forMainnet();
   } else {
     throw new Error(`Unsupported network: ${network}`);
@@ -37,8 +32,8 @@ function getHederaClient() {
   client.setOperator(operatorId, operatorKey);
   
   // Set default transaction fee and query payment
-  client.setDefaultMaxTransactionFee(100); // 100 HBAR max fee
-  client.setDefaultMaxQueryPayment(50); // 50 HBAR max query payment
+  client.setDefaultMaxTransactionFee(new Hbar(100)); // 100 HBAR max fee
+  client.setDefaultMaxQueryPayment(new Hbar(50)); // 50 HBAR max query payment
   
   return client;
 }
@@ -65,8 +60,8 @@ function getTreasuryAccountId() {
  */
 function getNFTConfig() {
   return {
-    tokenName: process.env.NFT_TOKEN_NAME || 'GameExclusiveAsset',
-    tokenSymbol: process.env.NFT_TOKEN_SYMBOL || 'GAME',
+    tokenName: process.env.NFT_TOKEN_NAME || "GameExclusiveAsset",
+    tokenSymbol: process.env.NFT_TOKEN_SYMBOL || "GAME",
     maxSupply: parseInt(process.env.NFT_MAX_SUPPLY) || 10000
   };
 }
@@ -76,7 +71,7 @@ function getNFTConfig() {
  * @returns {string} Mirror node URL
  */
 function getMirrorNodeUrl() {
-  return process.env.MIRROR_NODE_URL || 'https://testnet.mirrornode.hedera.com';
+  return process.env.MIRROR_NODE_URL || "https://testnet.mirrornode.hedera.com";
 }
 
 module.exports = {
@@ -86,4 +81,3 @@ module.exports = {
   getNFTConfig,
   getMirrorNodeUrl
 };
-

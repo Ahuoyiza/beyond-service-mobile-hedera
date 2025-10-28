@@ -1,9 +1,3 @@
-/**
- * Express Application Configuration
- * 
- * Configures and exports the Express application
- */
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -13,6 +7,9 @@ const routes = require('./routes');
 const { errorHandler, notFoundHandler } = require('./utils/errorHandler');
 
 const app = express();
+
+// Load environment variables for API Key check
+require('dotenv').config();
 
 // Security middleware
 app.use(helmet());
@@ -41,6 +38,29 @@ if (serverConfig.env === 'development') {
     console.log(`${req.method} ${req.path}`);
     next();
   });
+}
+
+// --- API Key Security Middleware ---
+const API_KEY = process.env.GAME_API_KEY;
+
+if (serverConfig.env !== 'development' && !API_KEY) {
+    console.error("FATAL: GAME_API_KEY is not set. API will not start securely.");
+    process.exit(1);
+}
+
+// Middleware to check API Key (only in non-development environments)
+if (serverConfig.env !== 'development') {
+  app.use("/api", (req, res, next) => {
+      const providedKey = req.headers["x-api-key"]; // Expect key in header
+      
+      if (providedKey && providedKey === API_KEY) {
+          next(); // Key is valid, proceed
+      } else {
+          res.status(401).json({ success: false, error: "Unauthorized: Invalid or missing X-API-Key header" });
+      }
+  });
+} else {
+  console.log("INFO: API Key check is disabled in development environment.");
 }
 
 // Mount API routes

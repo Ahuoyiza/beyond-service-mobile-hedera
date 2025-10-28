@@ -33,7 +33,7 @@ Follow these steps to get the project up and running on your local machine.
 1.  **Clone the repository**:
 
     ```bash
-    git clone <repository-url>
+    git clone <https://github.com/Ahuoyiza/beyond-service-mobile-hedera.git>
     cd hedera-game-backend
     ```
 

@@ -1,8 +1,3 @@
-/**
- * Server Entry Point
- * 
- * Starts the Express server and initializes Hedera services
- */
 
 require('dotenv').config();
 const app = require('./app');
@@ -32,9 +27,9 @@ async function initializeApp() {
       logger.warn('Note: Creating a new collection costs HBAR. Make sure your treasury account has sufficient balance.');
       
       // Uncomment the following line to create a new NFT collection on startup
-      // const tokenId = await hederaService.createNFTCollection();
-      // logger.info(`New NFT collection created: ${tokenId}`);
-      // logger.info(`Add this to your .env file: NFT_TOKEN_ID=${tokenId}`);
+      const tokenId = await hederaService.createNFTCollection();
+      logger.info(`New NFT collection created: ${tokenId}`);
+      logger.info(`Add this to your .env file: NFT_TOKEN_ID=${tokenId}`);
     }
 
     logger.info('Hedera services initialized successfully');
