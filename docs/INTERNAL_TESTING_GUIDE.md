@@ -4,7 +4,7 @@
 
 ## 1. Introduction
 
-This document provides instructions for developers to test the **Hedera Game Backend API** locally. Following these steps will ensure that the API is running correctly, connecting to the Hedera testnet, and performing all required functions as expected.
+This document provides instructions for developers to test the **Beyond Service Hedera Game Backend API** locally. Following these steps will ensure that the API is running correctly, connecting to the Hedera testnet, and performing all required functions as expected.
 
 ## 2. Prerequisites
 
