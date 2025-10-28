@@ -22,7 +22,7 @@ Before you begin, ensure you have the following:
 1.  **Unreal Engine Project**: A working Unreal Engine project (C++ or Blueprint-based).
 2.  **HTTP Plugin**: The `HTTP` module must be enabled in your Unreal Engine project.
 3.  **JSON Plugin**: The built-in `Json` and `JsonUtilities` modules are sufficient for handling JSON data.
-4.  **Live Backend**: The Hedera Game Backend is live and accessible at `https://beyond-service-mobile-hedera.railway.internal`. All requests must use the provided `GAME-API-Key` for authentication.
+4.  **Live Backend**: The Hedera Game Backend is live and accessible at `https://beyond-service-mobile-hedera-production.up.railway.app`. All requests must use the provided `GAME-API-Key` for authentication.
 
 ## 3. API Overview
 
