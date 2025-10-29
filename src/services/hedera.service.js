@@ -150,9 +150,7 @@ class HederaService {
     return this.tokenId;
   }
 
-  /**
-   * Close Hedera client connection
-   */
+ 
   close() {
     if (this.client) {
       this.client.close();
@@ -161,7 +159,7 @@ class HederaService {
   }
 }
 
-// Create singleton instance
+
 const hederaService = new HederaService();
 
 module.exports = hederaService;
