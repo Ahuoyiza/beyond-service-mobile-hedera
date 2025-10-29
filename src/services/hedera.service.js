@@ -128,12 +128,11 @@ class HederaService {
    */
   async verifyAccount(accountId) {
     try {
-      const account = AccountId.fromString(accountId);
+      // Use Mirror Node API for verification (more reliable than SDK query)
+      const mirrorNodeService = require('./mirrorNode.service');
+      const accountInfo = await mirrorNodeService.getAccountInfo(accountId);
       
-      // Try to query account balance to verify it exists
-      const balance = await this.client.getAccountBalance(account);
-      
-      console.log(`Account ${accountId} verified. Balance: ${balance.hbars.toString()}`);
+      console.log(`Account ${accountId} verified via Mirror Node. Balance: ${accountInfo.balance?.balance || 0}`);
       
       return true;
     } catch (error) {
@@ -150,7 +149,9 @@ class HederaService {
     return this.tokenId;
   }
 
- 
+  /**
+   * Close Hedera client connection
+   */
   close() {
     if (this.client) {
       this.client.close();
@@ -159,7 +160,7 @@ class HederaService {
   }
 }
 
-
+// Create singleton instance
 const hederaService = new HederaService();
 
 module.exports = hederaService;

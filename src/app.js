@@ -1,3 +1,9 @@
+/**
+ * Express Application Configuration
+ * 
+ * Configures and exports the Express application
+ */
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
