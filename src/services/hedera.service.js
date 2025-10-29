@@ -4,6 +4,7 @@
  * This service handles all interactions with the Hedera network including:
  * - NFT collection creation
  * - NFT minting
+ * - NFT transfer
  * - Account verification
  * - Token association checks
  */
@@ -13,6 +14,8 @@ const {
   TokenType,
   TokenSupplyType,
   TokenMintTransaction,
+  TransferTransaction,
+  NftId,
   AccountId,
   Status
 } = require('@hashgraph/sdk');
@@ -79,13 +82,20 @@ class HederaService {
   }
 
   /**
-   * Mint a new NFT for a user
+   * Mint a new NFT and transfer it to a recipient
+   * CRITICAL FIX: Now includes NFT transfer to recipient
+   * 
    * @param {string} metadata - NFT metadata (can be IPFS CID or JSON string)
-   * @returns {Promise<Object>} Minting result with serial number and transaction ID
+   * @param {string} recipientAccountId - Hedera account ID of the recipient
+   * @returns {Promise<Object>} Minting and transfer result with serial number and transaction IDs
    */
-  async mintNFT(metadata) {
+  async mintNFT(metadata, recipientAccountId) {
     if (!this.tokenId) {
       throw new Error('Token ID not set. Create NFT collection first or set existing token ID.');
+    }
+
+    if (!recipientAccountId) {
+      throw new Error('Recipient account ID is required');
     }
 
     try {
@@ -94,6 +104,7 @@ class HederaService {
       // Convert metadata to bytes
       const metadataBytes = Buffer.from(metadata);
       
+      // Step 1: Mint the NFT
       const mintTx = await new TokenMintTransaction()
         .setTokenId(this.tokenId)
         .addMetadata(metadataBytes)
@@ -104,20 +115,38 @@ class HederaService {
       const mintRx = await mintTxSubmit.getReceipt(this.client);
 
       const serialNumber = mintRx.serials[0].toString();
-      const transactionId = mintTxSubmit.transactionId.toString();
+      const mintTransactionId = mintTxSubmit.transactionId.toString();
 
-      console.log(`NFT minted successfully. Serial: ${serialNumber}, TxID: ${transactionId}`);
+      console.log(`NFT minted successfully. Serial: ${serialNumber}, TxID: ${mintTransactionId}`);
+
+      // Step 2: Transfer the NFT to the recipient
+      const nftId = new NftId(this.tokenId, serialNumber);
+      const recipientId = AccountId.fromString(recipientAccountId);
+      
+      console.log(`Transferring NFT ${this.tokenId}/${serialNumber} to ${recipientAccountId}...`);
+      
+      const transferTx = await new TransferTransaction()
+        .addNftTransfer(nftId, this.treasuryId, recipientId)
+        .freezeWith(this.client);
+
+      const transferTxSubmit = await transferTx.execute(this.client);
+      const transferRx = await transferTxSubmit.getReceipt(this.client);
+      const transferTransactionId = transferTxSubmit.transactionId.toString();
+
+      console.log(`NFT transferred successfully to ${recipientAccountId}. Transfer TxID: ${transferTransactionId}`);
 
       return {
         success: true,
         tokenId: this.tokenId,
         serialNumber,
-        transactionId,
+        mintTransactionId,
+        transferTransactionId,
+        recipientAccountId,
         metadata
       };
     } catch (error) {
-      console.error('Error minting NFT:', error);
-      throw new Error(`Failed to mint NFT: ${error.message}`);
+      console.error('Error minting/transferring NFT:', error);
+      throw new Error(`Failed to mint and transfer NFT: ${error.message}`);
     }
   }
 
