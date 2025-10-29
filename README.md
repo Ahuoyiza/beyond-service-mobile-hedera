@@ -1,174 +1,160 @@
-# Hedera Game Backend API
+# Beyond Service: Hedera-Powered Action RPG
 
-**Version: 1.0.0**
+**Project Title:** Beyond Service   
+**Hackathon Track:** African Metaverse Worlds
 
-This project provides a backend API implementation for integrating Hedera Hashgraph features into a game. It is designed to serve as a bridge between an Unreal Engine game client and the Hedera network, enabling features like wallet connection and the minting of exclusive in-game items as Non-Fungible Tokens (NFTs).
+## 🚀 Project Overview
 
-This initial version (MVP) focuses on providing a simple, testable framework for connecting to the Hedera testnet.
+**Beyond Service** is a an action adventure RPG franchise blending Souls-like combat with mythic storytelling inspired by Nigerian folklore. Our hackathon submission demonstrates a secure, production-ready integration with the Hedera network to deliver verifiable digital ownership and a foundation for a player-driven economy.
+
+Our project is a **Prototype (TRL 4-6)**, showcasing an end-to-end working feature: **Secure Wallet Connection and Exclusive NFT Minting (utilised as ingame assets for gameplay)**.
+
+## 🌍 Hedera Integration Summary (The Why)
+
+We chose Hedera for its **low, predictable fees** and **ABFT finality**, which are essential for building a sustainable and trustworthy economy for African gamers.
+
+| Hedera Service Used | Implementation | Economic Justification |
+| :--- | :--- | :--- |
+| **Hedera Token Service (HTS)** | Used to create the exclusive in-game assets as Non-Fungible Tokens (NFTs). The backend mints these tokens directly to the player's verified Hedera Testnet Account ID. | **Low, Predictable Fees:** Ensures that the cost of minting an exclusive in-game asset remains negligible for both the player and the game studio, making the P2E model economically sustainable even at high volume. |
+| **Hedera Account Service** | Used for wallet connection and verification. The backend uses the player's Account ID to verify existence and check eligibility for NFT minting. | **Security & Trust:** By using Hedera accounts, we leverage the network's security model, eliminating the need for players to share sensitive private keys, thereby building a secure and trustworthy foundation for our African user base. |
+
+### Specific Hedera Transactions Executed (MVP)
+
+*   `TokenCreateTransaction`
+*   `TokenMintTransaction`
+*   `TransferTransaction`
+*   `AccountInfoQuery`
+
+## ⚙️ Setup & Architecture
+
+This repository is structured as a mono-repo:
+1.  **`hedera-game-backend/`**: The Node.js API backend (See `API_README.md` for setup).
+2.  **`unreal-client/`**: The Unreal Engine game client (sub-repository - See `unreal-client/README.md`).
+
+### Architecture Diagram
+
+The system operates as a secure proxy, shielding the private keys from the client while leveraging Hedera for verifiable ownership.
+![Architecture Diagram](<images/architecture diagram.png>)
+
+
+## 🔑 Deployed Hedera IDs
+
+| ID Type | ID / Key | Description |
+| :--- | :--- | :--- |
+| **Treasury Account ID** | `0.0.7098468` | Account used to pay for transaction fees and sign minting transactions. |
+| **NFT Token ID** | `0.0.7109238` | The unique ID for the "Beyond Service Exclusive Asset" collection. |
+
+## 🎮 User Flow: Connecting Wallet & Minting NFTs
+
+### Prerequisites for Players
+
+Before a player can mint an exclusive game asset, they must:
+
+1.  **Have a Hedera Wallet**: Install [HashPack](https://www.hashpack.app/) or [Blade Wallet](https://bladewallet.io/)
+2.  **Switch to Testnet**: Configure the wallet to use Hedera Testnet
+3.  **Fund the Account**: Obtain test HBAR from the [Hedera Testnet Faucet](https://portal.hedera.com/)
+
+### Step-by-Step Minting Process
+
+#### Step 1: Connect Wallet
+Players enter their Hedera Account ID (e.g., `0.0.XXXXXXX`) in the game UI. The backend verifies the account exists on the network.
+
+#### Step 2: Associate Token (One-Time Setup)
+**Important:** Before minting, players must associate the game token with their wallet. This is a Hedera network requirement.
+
+**How to Associate:**
+1.  Open your Hedera wallet (HashPack or Blade)
+2.  Navigate to the "Tokens" section
+3.  Click "Associate Token" or "Add Token"
+4.  Enter Token ID: `0.0.7109238`
+5.  Confirm the transaction (costs ~$0.05 in test HBAR)
+
+**Note:** This is a one-time setup per wallet. Future versions will automate this via WalletConnect integration.
+
+#### Step 3: Mint Exclusive Asset
+Once associated, players can mint their exclusive game asset:
+1.  Click "Mint Asset" in the game
+2.  The backend mints the NFT and transfers it to the player's wallet
+3.  Players receive a transaction ID and can verify on [HashScan](https://hashscan.io/testnet/)
+
+#### Step 4: Verify Ownership
+Players can view their NFT in:
+*   Their Hedera wallet (HashPack/Blade)
+*   [HashScan Explorer](https://hashscan.io/testnet/account/0.0.XXXXXXX)
+*   The in-game inventory (future feature)
+
+### Technical Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Player
+    participant Game
+    participant API
+    participant Hedera
+    participant Wallet
+
+    Player->>Game: Enter Account ID
+    Game->>API: POST /api/wallet/connect
+    API->>Hedera: Verify Account
+    Hedera-->>API: Account Valid
+    API-->>Game: Connection Success
+    
+    Player->>Game: Click "Mint Asset"
+    Game->>API: POST /api/nft/mint
+    API->>Hedera: Check Token Association
+    
+    alt Not Associated
+        Hedera-->>API: Not Associated
+        API-->>Game: Error: Association Required
+        Game-->>Player: Show Association Instructions
+        Player->>Wallet: Associate Token
+        Wallet->>Hedera: TokenAssociateTransaction
+        Hedera-->>Wallet: Success
+        Player->>Game: Retry Mint
+    end
+    
+    API->>Hedera: TokenMintTransaction
+    Hedera-->>API: NFT Minted (Serial #1)
+    API->>Hedera: TransferTransaction
+    Hedera-->>API: Transfer Success
+    API-->>Game: Mint Success + Transaction ID
+    Game-->>Player: Show Success + HashScan Link
+```
+
+## 🚀 Future Roadmap & Game Economics
+
+Our vision is to integrate Hedera deeply into the game's economy:
+
+*   **Seasonal Hedera Campaigns**: Introduce unique, time-limited in-game campaigns tied directly to the Hedera ecosystem. These campaigns will feature exclusive assets (NFTs) that can **only** be earned during that season, ensuring scarcity and high value.
+*   **HBar Utility for Unlocks**: Certain unique hidden weapons, skins, and characters will be discoverable in the game world but can only be unlocked (minted) by spending **HBar**. This integrates HBar directly into the core progression loop.
+*   **Tradable Assets**: All core NFT assets will be fully tradable on external marketplaces and player-to-player within the game, giving them real-world value.
+
+## 🔗 Quick Links
+
+*   **API Backend Setup**: See `API_DOCS.md`
+*   **Unreal Integration Guide**: See `docs/UNREAL_ENGINE_INTEGRATION.md`
+*   **Demo Video Link**: tbd
+*   **Pitch Deck**: tbd
+*   **Live API**: https://beyond-service-mobile-hedera-production.up.railway.app
+*   **HashScan (Testnet)**: https://hashscan.io/testnet/
+
+## 📊 Project Status
+
+*   **Technology Readiness Level (TRL)**: 4-6 (Prototype with working integration)
+*   **Network**: Hedera Testnet
+*   **Deployment**: Railway (Production-ready)
+*   **Security**: API Key authentication, rate limiting, CORS protection
+
+## 👥 Team
+
+*   **Sophia Ahuoyiza Abubakar** - Project Lead, Backend Developer, 
+*   **Goodness** - Game Programmer, 
+*   **Leslie Osinachi-Okoh** - Game Designer, 
+
+## 📄 License
+
+This project is submitted for the Hedera Africa Hackathon 2025.
 
 ---
 
-## Features
-
--   **RESTful API**: A clean and simple API built with Express.js.
--   **Wallet Connection**: Endpoints to verify player Hedera accounts.
--   **NFT Minting**: An endpoint to mint exclusive game assets as NFTs on the Hedera testnet.
--   **Configurable**: Easily configurable through environment variables.
--   **Documentation**: Includes comprehensive guides for Unreal Engine integration and local testing.
--   **Scalable Structure**: Organized into services, controllers, and routes for future expansion.
-
-## Prerequisites
-
-Before you can run this project, you will need the following:
-
--   **Node.js**: Version 18.x or higher.
--   **npm**: Version 9.x or higher.
--   **Hedera Testnet Account**: A free account from the [Hedera Developer Portal](https://portal.hedera.com/).
--   **Testnet HBAR**: Your account must be funded with test HBAR from the portal's faucet to cover transaction fees.
-
-## Installation
-
-Follow these steps to get the project up and running on your local machine.
-
-1.  **Clone the repository**:
-
-    ```bash
-    git clone <https://github.com/Ahuoyiza/beyond-service-mobile-hedera.git>
-    cd hedera-game-backend
-    ```
-
-2.  **Install dependencies**:
-
-    ```bash
-    npm install
-    ```
-
-## Configuration
-
-Configuration is managed through environment variables.
-
-1.  **Create a `.env` file**:
-
-    Copy the example configuration file to create your own local setup.
-
-    ```bash
-    cp .env.example .env
-    ```
-
-2.  **Edit the `.env` file**:
-
-    Open the `.env` file and provide the necessary credentials for your Hedera testnet account.
-
-    -   `TREASURY_ACCOUNT_ID`: Your Hedera testnet account ID (e.g., `0.0.12345`).
-    -   `TREASURY_PRIVATE_KEY`: The private key for your treasury account.
-    -   `SUPPLY_PRIVATE_KEY`: The private key used to sign minting transactions. For this MVP, you can use the same key as the treasury.
-
-    ```env
-    # Server Configuration
-    PORT=3000
-
-    # Hedera Network Configuration
-    HEDERA_NETWORK=testnet
-
-    # Treasury Account Credentials
-    TREASURY_ACCOUNT_ID=0.0.XXXXXXX
-    TREASURY_PRIVATE_KEY=302e020100300506032b657004220420...
-
-    # Supply Key for NFT Minting
-    SUPPLY_PRIVATE_KEY=302e020100300506032b657004220420...
-
-    # NFT Collection Configuration (optional - will be created on first run)
-    NFT_TOKEN_ID=
-    ```
-
-## Running the Application
-
-### 1. First-Time Setup: Creating the NFT Collection
-
-The first time you start the server, you need to create the NFT collection on the Hedera network.
-
-1.  **Enable Collection Creation**:
-    Open `src/server.js` and uncomment this line:
-
-    ```javascript
-    // const tokenId = await hederaService.createNFTCollection();
-    ```
-
-2.  **Start the Server**:
-
-    ```bash
-    npm run dev
-    ```
-
-    The server will start, and the console will log the new `Token ID` for the NFT collection. **Copy this ID**.
-
-3.  **Update `.env`**:
-    Paste the new Token ID into your `.env` file:
-
-    ```env
-    NFT_TOKEN_ID=0.0.YYYYYY
-    ```
-
-4.  **Disable Collection Creation**:
-    Re-comment the line in `src/server.js` to prevent creating a new collection on every server start. Then, restart the server.
-
-### 2. Normal Operation
-
-To run the server in development mode with hot-reloading:
-
-```bash
-npm run dev
-```
-
-To run the server in production mode:
-
-```bash
-npm start
-```
-
-The API will be available at `http://localhost:3000`.
-
-## API Endpoints
-
-Here is a summary of the available API endpoints. For detailed information, refer to the **Internal Testing Guide**.
-
-| Endpoint                      | Method | Description                                      |
-| ----------------------------- | ------ | ------------------------------------------------ |
-| `/api/health`                 | `GET`  | Checks if the API is running.                    |
-| `/api/info`                   | `GET`  | Provides information about the API and NFT collection. |
-| `/api/wallet/connect`         | `POST` | Connects and verifies a player's Hedera wallet.  |
-| `/api/nft/eligibility/:id`    | `GET`  | Checks if a player is eligible to mint an NFT.   |
-| `/api/nft/mint`               | `POST` | Mints a new exclusive NFT for the player.        |
-| `/api/nft/collection/info`    | `GET`  | Retrieves details about the game's NFT collection.|
-| `/api/nft/:tokenId/:serial`   | `GET`  | Retrieves details for a specific NFT.            |
-
-## Project Structure
-
-```
-/hedera-game-backend
-|-- /docs                 # Documentation files
-|-- /src
-|   |-- /config           # Configuration for Hedera and Express
-|   |-- /controllers      # API route handlers (business logic)
-|   |-- /routes           # API route definitions
-|   |-- /services         # Services for Hedera and Mirror Node interaction
-|   |-- /utils            # Utility functions (error handler, logger)
-|   |-- app.js            # Express application setup
-|   |-- server.js         # Server entry point
-|-- /tests                # Test files
-|-- .env.example          # Example environment file
-|-- .gitignore
-|-- package.json
-|-- README.md
-```
-
-## Documentation
-
-This project includes the following detailed documentation in the `/docs` directory:
-
--   **`UNREAL_ENGINE_INTEGRATION.md`**: A guide for Unreal Engine developers on how to communicate with this API.
--   **`INTERNAL_TESTING_GUIDE.md`**: Instructions for developers on how to test the API locally.
-
-
-
-
+**Built with ❤️ for African gamers, powered by Hedera.**
