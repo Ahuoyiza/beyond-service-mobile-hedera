@@ -49,15 +49,19 @@ async function mintNFT(req, res) {
 
     // CRITICAL FIX 1: Account-based rate limiting (prevent spam)
     const lastMintTime = accountMintTracker.get(accountId);
-    const cooldownPeriod = 300000; // 5 minutes in milliseconds
+    const cooldownPeriod = 5 * 60 * 1000; // 5 minutes in milliseconds
     
-    if (lastMintTime && Date.now() - lastMintTime < cooldownPeriod) {
-      const remainingTime = Math.ceil((cooldownPeriod - (Date.now() - lastMintTime)) / 1000);
-      return res.status(429).json({
-        success: false,
-        error: `Please wait ${remainingTime} seconds before minting another NFT`,
-        retryAfter: remainingTime
-      });
+    if (lastMintTime) {
+      const timeSinceLastMint = Date.now() - lastMintTime;
+      if (timeSinceLastMint < cooldownPeriod) {
+        const waitTime = Math.ceil((cooldownPeriod - timeSinceLastMint) / 1000);
+        return res.status(429).json({
+          success: false,
+          error: 'Rate limit exceeded',
+          details: `Please wait ${waitTime} seconds before minting another NFT`,
+          retryAfter: waitTime
+        });
+      }
     }
 
     // Verify account exists
@@ -69,60 +73,70 @@ async function mintNFT(req, res) {
       });
     }
 
-    // Check if token collection exists
+    // CRITICAL FIX 2: Check if account already owns an NFT from this collection
     const tokenId = hederaService.getTokenId();
     if (!tokenId) {
       return res.status(500).json({
         success: false,
-        error: 'NFT collection not initialized. Please contact administrator.'
+        error: 'NFT collection not initialized'
       });
     }
 
-    // CRITICAL FIX 2: Check if user already owns an NFT from this collection
-    const isAssociated = await mirrorNodeService.isTokenAssociated(accountId, tokenId);
-    
-    if (isAssociated) {
-      const ownedNFTs = await mirrorNodeService.getAccountNFTs(accountId, tokenId);
-      
-      if (ownedNFTs.length > 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'You already own an exclusive asset from this collection',
-          data: {
-            ownedNFTs: ownedNFTs.length,
-            serialNumbers: ownedNFTs.map(nft => nft.serial_number),
-            message: 'Each wallet can only mint one exclusive game asset'
-          }
-        });
-      }
-    }
-
-    // CRITICAL FIX 3: Verify token association before minting
-    if (!isAssociated) {
+    const ownedNFTs = await mirrorNodeService.getAccountNFTs(accountId, tokenId);
+    if (ownedNFTs.length > 0) {
       return res.status(400).json({
         success: false,
-        error: 'Your account is not associated with the game token',
+        error: 'Account already owns an exclusive game asset',
         data: {
-          tokenId,
-          instructions: 'Please associate the token in your Hedera wallet first',
-          associationRequired: true
+          ownedNFTs: ownedNFTs.map(nft => ({
+            serialNumber: nft.serial_number,
+            tokenId: nft.token_id
+          })),
+          message: 'Each wallet can only mint one exclusive game asset'
         }
       });
     }
 
-    // Create NFT metadata
+    // CRITICAL FIX 3: Verify token association before minting
+    const isAssociated = await mirrorNodeService.isTokenAssociated(accountId, tokenId);
+    if (!isAssociated) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token association required before minting',
+        data: {
+          tokenId,
+          tokenSymbol: 'BS_GAME',
+          tokenName: 'BSHD_Artefacts',
+          associationRequired: true,
+          instructions: {
+            title: 'How to associate the token:',
+            step1: '1. Open your Hedera wallet (HashPack or Blade)',
+            step2: '2. Switch to Testnet network',
+            step3: '3. Navigate to the "Tokens" section',
+            step4: '4. Click "Associate Token" or "Add Token"',
+            step5: `5. Enter Token ID: ${tokenId}`,
+            step6: '6. Confirm the transaction (costs ~$0.05 in test HBAR)',
+            step7: '7. Return to the game and try minting again'
+          },
+          helpLinks: {
+            viewToken: `https://hashscan.io/testnet/token/${tokenId}`,
+            hashPackGuide: 'https://docs.hashpack.app/'
+          },
+          note: 'This is a one-time setup per wallet. Future versions will automate this process via WalletConnect.'
+        }
+      } );
+    }
+
+    // Create NFT metadata (simplified to fit 100-byte limit)
     const metadata = {
       name: assetName,
-      description: 'Exclusive game asset for Hedera wallet holders',
       type: 'game_asset',
-      recipient: accountId,
-      attributes: attributes || {},
-      mintedAt: new Date().toISOString()
+      attributes: attributes || {}
     };
 
     const metadataString = JSON.stringify(metadata);
 
-    // Validate metadata size (Hedera limit is 100 bytes)
+    // Validate metadata size (Hedera limit is 100 bytes per metadata entry)
     if (Buffer.from(metadataString).length > 100) {
       return res.status(400).json({
         success: false,
@@ -143,11 +157,10 @@ async function mintNFT(req, res) {
       data: {
         tokenId: mintResult.tokenId,
         serialNumber: mintResult.serialNumber,
+        recipient: mintResult.recipientAccountId,
         mintTransactionId: mintResult.mintTransactionId,
         transferTransactionId: mintResult.transferTransactionId,
-        recipient: accountId,
-        assetName,
-        metadata: metadata,
+        metadata: JSON.parse(mintResult.metadata),
         explorerUrl: `https://hashscan.io/testnet/transaction/${mintResult.transferTransactionId}`
       }
     } );
@@ -167,30 +180,21 @@ async function mintNFT(req, res) {
  * 
  * @route GET /api/nft/:tokenId/:serialNumber
  * @param {string} tokenId - Token ID
- * @param {string} serialNumber - NFT serial number
+ * @param {string} serialNumber - Serial number of the NFT
  */
 async function getNFTInfo(req, res) {
   try {
     const { tokenId, serialNumber } = req.params;
 
-    if (!tokenId || !serialNumber) {
-      return res.status(400).json({
-        success: false,
-        error: 'Token ID and serial number are required'
-      });
-    }
-
     const nftInfo = await mirrorNodeService.getNFTInfo(tokenId, serialNumber);
 
-    // Parse metadata if it's a JSON string
-    let parsedMetadata = null;
-    if (nftInfo.metadata) {
-      try {
-        const metadataString = Buffer.from(nftInfo.metadata, 'base64').toString('utf-8');
-        parsedMetadata = JSON.parse(metadataString);
-      } catch (e) {
-        parsedMetadata = nftInfo.metadata;
-      }
+    // Parse metadata if it's JSON
+    let parsedMetadata = nftInfo.metadata;
+    try {
+      const metadataString = Buffer.from(nftInfo.metadata, 'base64').toString('utf-8');
+      parsedMetadata = JSON.parse(metadataString);
+    } catch (e) {
+      // If parsing fails, keep original metadata
     }
 
     res.status(200).json({
