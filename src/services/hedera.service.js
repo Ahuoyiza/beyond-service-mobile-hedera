@@ -164,4 +164,3 @@ class HederaService {
 const hederaService = new HederaService();
 
 module.exports = hederaService;
-
