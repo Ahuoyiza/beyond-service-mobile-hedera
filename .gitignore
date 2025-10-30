@@ -43,3 +43,47 @@ build/
 tmp/
 temp/
 
+# Unreal Engine standard ignores
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+.vs/
+.idea/
+*.VC.db
+*.VC.opendb
+
+# Unreal user/project-specific files
+*.suo
+*.user
+*.userprefs
+*.log
+*.tlog
+*.tmp
+*.vscode
+*.xcodeproj
+*.xcworkspace
+
+# Compiled or packaged builds
+*.exe
+*.apk
+*.app
+*.dmg
+*.ipa
+*.pak
+*.zip
+
+# Auto-generated configs
+Config/DefaultEditorPerProjectUserSettings.ini
+Config/DefaultEditor.ini
+
+# Backups and autosaves
+Backup/
+Autosaves/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
