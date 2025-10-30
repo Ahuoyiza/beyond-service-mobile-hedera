@@ -9,6 +9,28 @@
 
 Our project is a **Prototype (TRL 4-6)**, showcasing an end-to-end working feature: **Secure Wallet Connection and Exclusive NFT Minting (utilised as ingame assets for gameplay)**.
 
+### Game Snapshots
+### teaser
+<video controls src="images/BeyondService_Teaser_2025.mp4" title="Title"></video>
+### Characters:
+![alt text](<images/1 (1).png>)
+![alt text](<images/4 (1).png>)
+![alt text](images/IMG_7528.PNG)
+![alt text](<images/Rendered View.PNG>)
+![alt text](<images/Rendered View (2).PNG>)
+
+### Environment
+![alt text](<images/Screenshot 2025-10-30 170259.png>)
+![alt text](<images/Screenshot 2025-10-30 170401.png>)
+![alt text](<images/Screenshot 2025-10-30 170428.png>)
+
+### hedera ui screens
+![alt text](<images/Frame 3467287.png>)
+![alt text](<images/Frame 3467284.png>)
+
+### Gameplay Snippet
+<video controls src="images/gameplay vid.mp4" title="Title"></video>
+
 ## 🌍 Hedera Integration Summary (The Why)
 
 We chose Hedera for its **low, predictable fees** and **ABFT finality**, which are essential for building a sustainable and trustworthy economy for African gamers.
@@ -28,8 +50,8 @@ We chose Hedera for its **low, predictable fees** and **ABFT finality**, which a
 ## ⚙️ Setup & Architecture
 
 This repository is structured as a mono-repo:
-1.  **`hedera-game-backend/`**: The Node.js API backend (See `API_README.md` for setup).
-2.  **`unreal-client/`**: The Unreal Engine game client (sub-repository - See `unreal-client/README.md`).
+1.  **`/`**: The Node.js API backend (See `API_README.md` for setup).
+2.  **`bs_unreal-client/`**: The Unreal Engine game client.
 
 ### Architecture Diagram
 
