@@ -4,7 +4,7 @@
 **Author:** Sophia Ahuoyiza Abubakar  
 **Date:** 29th October 2025
 
-This project provides a backend API implementation for integrating Hedera Hashgraph features into a game. It is designed to serve as a bridge between an Unreal Engine game client and the Hedera network, enabling features like wallet connection and the minting of exclusive in-game items as Non-Fungible Tokens (NFTs).
+This project provides a backend API implementation for integrating Hedera Hashgraph features into a game. It is designed to serve as a bridge between our Unreal Engine game client and the Hedera network, enabling features like wallet connection and the minting of exclusive in-game items as Non-Fungible Tokens (NFTs).
 
 This initial version (MVP) focuses on providing a simple, testable framework for connecting to the Hedera testnet.
 

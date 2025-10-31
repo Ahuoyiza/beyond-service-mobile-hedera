@@ -1,7 +1,7 @@
 # Beyond Service: Hedera-Powered Action RPG
 
 **Project Title:** Beyond Service   
-**Hackathon Track:** African Metaverse Worlds
+**Hackathon Track:** Gaming and NFTs, subtrack African Metaverse Worlds and Digital Collectibles & NFTs
 
 ## 🚀 Project Overview
 
@@ -9,9 +9,11 @@
 
 Our project is a **Prototype (TRL 4-6)**, showcasing an end-to-end working feature: **Secure Wallet Connection and Exclusive NFT Minting (utilised as ingame assets for gameplay)**.
 
+**For Project local Setup (API):** [API_DOCS.md](API_DOCS.md)
+
 ### Game Snapshots
 ### teaser
-
+<video controls src="images/teaser.mp4" title="Title"></video>
 ### Characters:
 ![alt text](<images/1 (1).png>)
 ![alt text](<images/4 (1).png>)
@@ -152,11 +154,11 @@ Our vision is to integrate Hedera deeply into the game's economy:
 *   **Tradable Assets**: All core NFT assets will be fully tradable on external marketplaces and player-to-player within the game, giving them real-world value.
 
 ## 🔗 Quick Links
-
+*   **Pitch Deck**: [Beyond Service Pitch Deck](https://www.canva.com/design/DAG3UdnrVO4/qQFEtIraTORDrfrTlfPc8w/view?utm_content=DAG3UdnrVO4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h1f1f53c3e8)
+*   **Demo Video**: [Beyond service Demo Video](https://youtu.be/6WYF2r5TXpk?si=cpL2sQq_RivOYrd-)
+*   **Landing Page**: [beyondservicehedera.framer.website](https://beyondservicehedera.framer.website/)
 *   **API Backend Setup**: See `API_DOCS.md`
 *   **Unreal Integration Guide**: See `docs/UNREAL_ENGINE_INTEGRATION.md`
-*   **Demo Video Link**: tbd
-*   **Pitch Deck**: tbd
 *   **Live API**: https://beyond-service-mobile-hedera-production.up.railway.app
 *   **HashScan (Testnet)**: https://hashscan.io/testnet/
 
@@ -173,10 +175,13 @@ Our vision is to integrate Hedera deeply into the game's economy:
 *   **Goodness** - Game Programmer, 
 *   **Leslie Osinachi-Okoh** - Game Designer, 
 
+### Team Hashgraph Certificate (Sophia Abubakar)
+![alt text](<images/hashgraph cert.png>)
+
 ## 📄 License
 
 This project is submitted for the Hedera Africa Hackathon 2025.
 
 ---
 
-**Built with ❤️ for African gamers, powered by Hedera.**
+**Built with ❤️ for gamers, powered by Hedera.**
