@@ -11,7 +11,7 @@ Our project is a **Prototype (TRL 4-6)**, showcasing an end-to-end working featu
 
 ### Game Snapshots
 ### teaser
-<video controls src="images/BeyondService_Teaser_2025.mp4" title="Title"></video>
+
 ### Characters:
 ![alt text](<images/1 (1).png>)
 ![alt text](<images/4 (1).png>)
